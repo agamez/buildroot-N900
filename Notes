@@ -1,0 +1,72 @@
+20:05 < ceene> buildroot lets me choose among this, and later on it lets me choose hf and thumb
+20:05 < ceene> arm920t arm922t arm926t arm1136j-s arm1136jf-s arm1176jz-s arm1176jzf-s mpcore 
+               cortex-A5 cortex-A7 cortex-A8 cortex-A9 cortex-A12 cortex-A15 cortex-M3 fa526/626 
+               pj4 strongarm sa110/sa1100 xscale iwmmxt
+20:05 < ceene> i don't know which of these should I choose
+20:06 < freemangordon> cortex-a8
+20:06 < ceene> cool, thanks!
+20:06 < ceene> now it lets me choose EABI or EABIhf, I'll test both
+20:07 < ceene> and also "floating point strategy" which can be soft float, VFPv2, VFPv3, VFPv3-D16 
+               and NEON
+20:07 < freemangordon> NEON
+20:07 < ceene> and later on, ARM vs Thumb2
+20:07 < freemangordon> which kernel?
+20:07 < freemangordon> 4.4?
+20:08 < ceene> yes, i'll be compiling Pali's one
+20:08 < freemangordon> thumb2 then
+20:08 < ceene> ok!
+20:08 < freemangordon> ceene: you build debian, correct?
+20:08 < ceene> no, not right now
+20:08 < freemangordon> what are you doing then?
+20:08 < ceene> i'm using buildroot to build a very basic rootfs
+20:09 < ceene> just a shell and little else
+20:09 < freemangordon> still, the same
+20:09 < ceene> and little by little i'll be adding things
+20:09 < freemangordon> you'd better choose EABIhf
+20:09 < ceene> although first thing will be trying to boot maemo with this kernel
+20:09 < freemangordon> ceene: you need to do some thing to maemo to be able to boot it with 
+                       upstream kernels
+20:10 < ceene> it won�'t boot by default?
+20:10 < freemangordon> no
+20:10 < ceene> oh
+20:10 < ceene> what needs to be done?
+20:10 < ceene> is it written somewhere?
+20:10 < Pali> for n900 use gcc flags: -march=armv7-a -mcpu=cortex-a8 -mtune=cortex-a8 -mfpu=neon
+20:11 < Pali> for thumb build add flags: -mthumb -mno-thumb-interwork
+20:11 < Pali> and for hardfp add: mfloat-abi=hard
+20:12 < freemangordon> -mno-thumb-interwork is by default iirc
+20:12 < freemangordon> but doesn;t hurt either to add it
+20:12 < ceene> ok
+20:13 < freemangordon> ceene: https://lkml.org/lkml/2015/7/24/469
+20:13 < Pali> for softfp use instead: -mfloat-abi=softfp (needed for Maemo5)
+20:13 < ceene> great, thanks!
+20:13 < freemangordon> ceene: but!!!
+20:13 < Pali> ceene: do not change /etc/event.d/sgx file (as written in that LKML post)
+20:14 < ceene> ok
+20:14 < freemangordon> ceene: there is still a nasty bug that ruins onenand fs after the first 
+                       powerdown/reboot
+20:14 < ceene> oh
+20:14 < freemangordon> so you'd better not try it now :)
+20:14 < ceene> lol
+20:15 < ceene> ok
+20:15 < ceene> but flashing again will fix it, won't it?
+20:15 < freemangordon> sure
+20:15 < ceene> ok, then i don't mind
+20:15 < ceene> that's why I bought this new n900 :)
+20:15 < ceene> i want to help you guys test all of this :)
+20:15 < freemangordon> cool. who know, you may even find that bug :)
+20:16 < freemangordon> knows even
+
+
+The N900 has several watchdogs that can be disabled by NOLO R&D flags.
+If they are kept enabled, they are standard watchdogs (see kernel's Documentation/watchdog/watchdog-api.txt)
+Busybox has support for /dev/watchdog devices and buildroot is able to set a daemon to reset them.
+There is also ioctl for disabling watchdog (and our drivers and HW support it).
+Pali's bootmenu also supports it: https://garage.maemo.org/plugins/ggit/browse.php/?p=bootmenu;a=blob;f=src/watchdogs.c
+On this code, libcal is used only to check if R&D mode is enabled
+
+The way to boot output/zImage.omap-n900 with a filesystem on ram is this:
+  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0'
+
+If there's no watchdog daemon on your userspace, you'll want to disable them by enabling R&D mode:
+  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0' -R 1 -F no-omap-wd,no-ext-wd,no-lifeguard-reset

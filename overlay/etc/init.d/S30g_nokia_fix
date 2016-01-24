@@ -1,0 +1,25 @@
+#!/bin/sh
+#
+# Start the nokia usb gadget fix....
+# https://lkml.org/lkml/2016/1/9/69
+
+# Debian ifupdown needs the /run/network lock directory
+
+case "$1" in
+  start)
+ 	echo "Starting nokia usb gadget fix..."
+	echo peripheral > /sys/bus/platform/devices/musb-hdrc.0.auto/mode 
+	;;
+  stop)
+	printf "Stopping nokia usb gadget fix..."
+	;;
+  restart|reload)
+	"$0" stop
+	"$0" start
+	;;
+  *)
+	echo "Usage: $0 {start|stop|restart}"
+	exit 1
+esac
+
+exit $?

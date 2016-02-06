@@ -70,3 +70,30 @@ The way to boot output/zImage.omap-n900 with a filesystem on ram is this:
 
 If there's no watchdog daemon on your userspace, you'll want to disable them by enabling R&D mode:
   0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0' -R 1 -F no-omap-wd,no-ext-wd,no-lifeguard-reset
+
+Things to do:
+Red parts on http://elinux.org/N900
+20:57 < Pali> status about camera: does not work for unknown reason
+20:57 < Pali> broken between v3.5 and v3.8
+20:58 < ceene> that should be at least bisectable?
+20:58 < Pali> very very hard, but should be
+20:59 < Pali> camera support in those versions was not part of mainline kernel
+20:59 < ceene> i guess it exposes a video4linux device
+20:59 < Pali> so bisecting would mean to apply all patches on top of commit for testing
+20:59 < Pali> ceene: yes v4l2 device
+20:59 < ceene> so maybe it's somewhat easier to read the datasheet and try to find any discrepancies
+20:59 < Pali> but it use mediactl for config
+21:00 < Pali> problem is that camera do not send data
+21:00 < ceene> doesn't answer to anything or is it only video that is not working?
+21:01 < Pali> ceene: camera do not send any data
+21:02 < Pali> bluetooth status: original nokia driver was rejected and sre written new one (which use correct api), but for unknown reason do not 
+              work, just send unknown error
+21:03 < Pali> ceene: what is missing is also ir driver
+21:04 < Pali> driver is in mainline kernel but needs fixing for multiarch API
+21:04 < Pali> yes, that rx51 cir driver
+21:06 < Pali> ceene: that ir-rx51.c should be the easiest missing part
+21:06 < Pali> some info on https://lkml.org/lkml/2016/1/2/61
+21:09 < Pali> or something different... fix tidspbridge driver (for DSP video hw accel), currently there are compile errors so it is disabled
+21:09 < Pali> on older kernels when there were no compile errors I think it worked
+21:12 < Pali> ceene: for enabling tidspbridge add these config options: CONFIG_TIDSPBRIDGE=m CONFIG_TIDSPBRIDGE_DVFS=y 
+              CONFIG_TIDSPBRIDGE_MEMPOOL_SIZE=0x600000

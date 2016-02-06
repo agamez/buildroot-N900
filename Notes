@@ -66,10 +66,10 @@ Pali's bootmenu also supports it: https://garage.maemo.org/plugins/ggit/browse.p
 On this code, libcal is used only to check if R&D mode is enabled
 
 The way to boot output/zImage.omap-n900 with a filesystem on ram is this:
-  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0'
+  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0 panic=5'
 
 If there's no watchdog daemon on your userspace, you'll want to disable them by enabling R&D mode:
-  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0' -R 1 -F no-omap-wd,no-ext-wd,no-lifeguard-reset
+  0xFFFF -m kernel:zImage.omap3-n900 -m initfs:rootfs.ext2 -l -b 'rootdelay root=/dev/ram0 panic=5' -R 1 -F no-omap-wd,no-ext-wd,no-lifeguard-reset
 
 Things to do:
 Red parts on http://elinux.org/N900

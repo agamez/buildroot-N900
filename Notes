@@ -58,6 +58,71 @@
 20:16 < freemangordon> knows even
 
 
+From	Pali Roh??r <>
+Subject	Re: linux 4.2-rc1 broken Nokia N900
+Date	Fri, 24 Jul 2015 17:50:33 +0200
+	
+
+On Friday 24 July 2015 10:40:58 Pali Roh??r wrote:
+> On Friday 24 July 2015 16:18:09 Dave Young wrote:
+> > On 07/11/15 at 02:05pm, Pali Roh??r wrote:
+> > > Hello,
+> > > 
+> > > now I tested 4.2-rc1 release on Nokia N900 and couple of drivers
+> > > are broken and cause kernel oops...
+> > > 
+> > > Basically wifi, touchscreen and rtc drivers not working...
+> > 
+> > Pali, could you tell how do you test mainline kernel on n900?
+> > 
+> > I used to use n900 as a usb dbgp gadget with a backport patch to
+> > 2.6.28 so that I can get early debug kernel message from my laptop.
+> > 
+> > I tried mainline previously with Fedora arm, text mode works but
+> > no graphics. Is there a way to use maemo UI with mainline kernel?
+> > 
+> > Thanks
+> > Dave
+> 
+> Hi! Starting Maemo with mainline kernel is not possible. But you can
+> patch Maemo (userspace) and apply some kernel patches and you could
+> boot Maemo system with Hildon UI.
+> 
+> You need:
+> 
+> Patched kernel:
+> https://github.com/pali/linux-n900
+> 
+> CSSU-devel:
+> https://wiki.maemo.org/CSSU
+> http://talk.maemo.org/showthread.php?t=84292
+> 
+> Open source battery management:
+> http://talk.maemo.org/showthread.php?t=93183
+> 
+> Fixup for Dialer application (rtcom-call-ui):
+> Fixing HAL path
+> /org/freedesktop/Hal/devices/platform_soc_audio_logicaldev_input
+> 
+
+Create new file /etc/event.d/userspace-fixes with content:
+
+start on started hildon-desktop
+service
+console none
+script
+	if ! hal-device /org/freedesktop/Hal/devices/platform_soc_audio_logicaldev_input 2> /dev/null; then
+		hal-device --add /org/freedesktop/Hal/devices/platform_soc_audio_logicaldev_input < /dev/null
+		hal-set-property --udi /org/freedesktop/Hal/devices/platform_soc_audio_logicaldev_input --key input.jack.type --strlist-pre "a"
+		hal-set-property --udi /org/freedesktop/Hal/devices/platform_soc_audio_logicaldev_input --key input.jack.type --strlist-rem "a"
+	fi
+end script
+
+cmt_speech isn't automatically loaded, so you must add it to /etc/modules
+wl1251 is looking for firmware on a subdirectory, so a link is needed:
+mkdir -p /lib/firmware/ti-connectivity; ln -s /lib/firmware/wl* /lib/firmware/ti-connectivity
+
+
 The N900 has several watchdogs that can be disabled by NOLO R&D flags.
 If they are kept enabled, they are standard watchdogs (see kernel's Documentation/watchdog/watchdog-api.txt)
 Busybox has support for /dev/watchdog devices and buildroot is able to set a daemon to reset them.

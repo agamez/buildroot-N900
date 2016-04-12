@@ -165,3 +165,34 @@ Red parts on http://elinux.org/N900
 21:09 < Pali> on older kernels when there were no compile errors I think it worked
 21:12 < Pali> ceene: for enabling tidspbridge add these config options: CONFIG_TIDSPBRIDGE=m CONFIG_TIDSPBRIDGE_DVFS=y 
               CONFIG_TIDSPBRIDGE_MEMPOOL_SIZE=0x600000
+
+
+13:09 < Wizzup> HRH_H_Crab: hi there
+13:09 < Wizzup> I have gotten audio to work on 4.3 and 4.5 from Pali
+13:09 < Wizzup> You mostly just need to tweak a few ALSA settings
+13:10 < Wizzup> I have them documented here somewhere...
+13:10 < Wizzup> Right, see: http://sprunge.us/aPeU
+13:10 < Wizzup> Specifically the last two items are important
+13:10 < Wizzup> (just the volume change is not so important)
+13:11 < Wizzup> Hm, I recall there being more changes. Well, see if you can figure it out with this. If not, let me know
+13:11 < Wizzup> You can use amixer to dump the current config - that's how I made the diff
+10,11c10,11
+<   Front Left: Playback 116 [91%] [-5.50dB]
+<   Front Right: Playback 116 [91%] [-5.50dB]
+---
+>   Front Left: Playback 87 [69%] [-20.00dB]
+>   Front Right: Playback 87 [69%] [-20.00dB]
+27,28c27,28
+<   Front Left: Playback 109 [92%] [-4.50dB]
+<   Front Right: Playback 109 [92%] [-4.50dB]
+---
+>   Front Left: Playback 71 [60%] [-23.50dB]
+>   Front Right: Playback 71 [60%] [-23.50dB]
+174c174
+<   Item0: 'Headset'
+---
+>   Item0: 'Off'
+487c487
+<   Mono: Playback 34 [81%] [-9.98dB]
+---
+>   Mono: Playback 0 [0%] [-59.50dB]
